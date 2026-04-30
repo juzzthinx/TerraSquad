@@ -1,0 +1,1237 @@
+import { useState } from "react";
+
+const ASIA_FEED = [
+  {
+    user: "Hana Mori", handle: "@hanamori.terra", country: "🇯🇵 Kyoto",
+    caption: "Morning mist in a bottle. Three months growing this hinoki forest. Worth every patient hour.",
+    tags: ["#WabiSabi", "#MossTerrarium", "#KyotoGreen"],
+    emoji: "🌲", bg: "linear-gradient(160deg, #2d3d2a 0%, #4a5e3a 50%, #6b7f5a 100%)",
+    likes: 1240, comments: 84, time: "2h ago", style: "Temperate Forest"
+  },
+  {
+    user: "Rizal Azhari", handle: "@rizal.kebun", country: "🇲🇾 Kuala Lumpur",
+    caption: "Humid jungle vibes right on my desk at KLCC. Fittonia & selaginella doing their thing.",
+    tags: ["#TropicalTerrarium", "#KLGreen", "#TerraSquadMY"],
+    emoji: "🌿", bg: "linear-gradient(160deg, #1a3a1a 0%, #2d5a2a 50%, #4a7a40 100%)",
+    likes: 876, comments: 52, time: "5h ago", style: "Tropical"
+  },
+  {
+    user: "Chalisa Porn", handle: "@chalisaplants", country: "🇹🇭 Bangkok",
+    caption: "Desert meets monsoon. Cactus garden after the rain — this contrast never gets old.",
+    tags: ["#DesertTerra", "#BKKPlants", "#AridGarden"],
+    emoji: "🌵", bg: "linear-gradient(160deg, #5a4a2a 0%, #8a6a3a 50%, #c8a870 100%)",
+    likes: 1053, comments: 67, time: "8h ago", style: "Arid"
+  },
+  {
+    user: "Seo Jiyeon", handle: "@jiyeon.micro", country: "🇰🇷 Seoul",
+    caption: "First open terrarium. Haworthia cluster growing strong through winter. Clean lines only.",
+    tags: ["#MinimalTerra", "#SeoulPlants", "#SugarGarden"],
+    emoji: "🪨", bg: "linear-gradient(160deg, #3a3a3a 0%, #5a5a4a 50%, #8a8a7a 100%)",
+    likes: 2100, comments: 130, time: "12h ago", style: "Minimal"
+  },
+  {
+    user: "Dian Puspita", handle: "@dianterrarium", country: "🇮🇩 Bandung",
+    caption: "Aquatic paludarium — 6 months build. Golden mystery snails just arrived from the market.",
+    tags: ["#Paludarium", "#AquaticTerra", "#BandungPlants"],
+    emoji: "💧", bg: "linear-gradient(160deg, #1a2a3a 0%, #2a4a5a 50%, #3a7a7a 100%)",
+    likes: 1887, comments: 210, time: "1d ago", style: "Aquatic"
+  },
+  {
+    user: "Wei Ling Tan", handle: "@weiling.jars", country: "🇸🇬 Singapore",
+    caption: "Closed ecosystem day 90. Zero maintenance. The fog appears every morning like clockwork.",
+    tags: ["#ClosedTerrarium", "#SGGarden", "#SelfSustaining"],
+    emoji: "🫙", bg: "linear-gradient(160deg, #283828 0%, #3d5c3a 50%, #5a7a55 100%)",
+    likes: 3240, comments: 298, time: "1d ago", style: "Closed Ecosystem"
+  },
+  {
+    user: "Aiko Tanaka", handle: "@aiko.miniworlds", country: "🇯🇵 Tokyo",
+    caption: "Night garden terrarium. Added bioluminescent substrate. It glows after sundown 🌙",
+    tags: ["#NightTerra", "#TokyoPlants", "#GlowGarden"],
+    emoji: "🌙", bg: "linear-gradient(160deg, #0a0f0a 0%, #1a2a1a 50%, #2a3f2a 100%)",
+    likes: 4510, comments: 412, time: "2d ago", style: "Dark"
+  },
+  {
+    user: "Ahmad Faris", handle: "@faris.terrarium", country: "🇲🇾 Penang",
+    caption: "Penang hill moss — collected ethically and rehomed into this open bowl. Feels like home.",
+    tags: ["#PenangPlants", "#MossArt", "#TerraSquadMY"],
+    emoji: "🍀", bg: "linear-gradient(160deg, #2a3a1a 0%, #4a5a2a 50%, #6a7a4a 100%)",
+    likes: 654, comments: 41, time: "2d ago", style: "Moss"
+  },
+];
+
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap');`;
+
+const styles = `
+  ${FONTS}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F7F5F0;
+    --ink: #1A1A18;
+    --moss: #4A5240;
+    --sand: #C8B89A;
+    --sage: #8A9A7A;
+    --glass: rgba(247,245,240,0.7);
+    --border: rgba(26,26,24,0.08);
+  }
+
+  body { background: var(--cream); }
+
+  .app {
+    min-height: 100vh;
+    background: var(--cream);
+    font-family: 'DM Mono', monospace;
+    color: var(--ink);
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 48px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(247,245,240,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+
+  .nav-logo span {
+    color: var(--moss);
+    font-style: italic;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  .nav-links a {
+    cursor: pointer;
+    transition: color 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* HERO */
+  .hero {
+    padding: 80px 48px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-text h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+  }
+
+  .hero-text h1 em {
+    font-style: italic;
+    color: var(--moss);
+  }
+
+  .hero-text p {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #666;
+    letter-spacing: 0.04em;
+    max-width: 360px;
+    margin-bottom: 36px;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .btn-primary:hover {
+    background: var(--moss);
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-left: 12px;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--ink);
+  }
+
+  /* GALLERY PREVIEW */
+  .gallery-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .gallery-card {
+    aspect-ratio: 3/4;
+    background: linear-gradient(135deg, #d4e0c8 0%, #b8c9a4 50%, #8a9a7a 100%);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .gallery-card:nth-child(2) {
+    background: linear-gradient(135deg, #c8d4b8 0%, #9aaa88 50%, #6a7a5a 100%);
+    margin-top: 24px;
+  }
+
+  .gallery-card:nth-child(3) {
+    background: linear-gradient(135deg, #dce4d0 0%, #c0cdb0 50%, #909e80 100%);
+    margin-top: -16px;
+  }
+
+  .gallery-card-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(247,245,240,0.9);
+    background: rgba(26,26,24,0.3);
+    padding: 4px 8px;
+    backdrop-filter: blur(4px);
+  }
+
+  .terrarium-visual {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    opacity: 0.6;
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 48px;
+    max-width: 1200px;
+    margin: 0 auto 60px;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-text { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sand); }
+
+  /* BUILDER SECTION */
+  .builder {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  .builder-header {
+    margin-bottom: 48px;
+  }
+
+  .builder-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    margin-bottom: 8px;
+  }
+
+  .builder-header p {
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+  }
+
+  .builder-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* FORM */
+  .form-section { display: flex; flex-direction: column; gap: 28px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 10px; }
+
+  .form-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .chip:hover { border-color: var(--moss); color: var(--moss); }
+
+  .chip.active {
+    background: var(--moss);
+    color: var(--cream);
+    border-color: var(--moss);
+  }
+
+  .form-input {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    background: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .form-input:focus { border-color: var(--moss); }
+
+  .form-textarea {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    background: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    height: 80px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .form-textarea:focus { border-color: var(--moss); }
+
+  .generate-btn {
+    padding: 16px 32px;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .generate-btn:hover:not(:disabled) { background: var(--moss); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* RESULT PANEL */
+  .result-panel {
+    background: white;
+    border: 1px solid var(--border);
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .result-panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .result-panel-title {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  .result-panel-body {
+    padding: 28px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #ccc;
+    text-align: center;
+  }
+
+  .empty-icon { font-size: 48px; opacity: 0.4; }
+
+  .empty-state p {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    line-height: 1.7;
+    max-width: 200px;
+  }
+
+  /* DESIGN OUTPUT */
+  .design-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .design-visual {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #dce8d0 0%, #b8ccaa 40%, #8fa880 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .design-visual-inner {
+    font-size: 72px;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.15));
+  }
+
+  .design-description {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #555;
+    letter-spacing: 0.03em;
+  }
+
+  .plant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .plant-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--cream);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .plant-name { color: var(--ink); }
+  .plant-role { color: var(--sage); font-size: 10px; letter-spacing: 0.08em; }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .price-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+
+  .price-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-cart {
+    flex: 1;
+    padding: 13px;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cart:hover { background: var(--moss); }
+
+  .btn-save {
+    padding: 13px 20px;
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover { border-color: var(--ink); }
+
+  /* LOADING */
+  .loading-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .loading-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--moss);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading-text {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+
+  /* GALLERY SECTION */
+  .gallery-section {
+    background: var(--ink);
+    padding: 80px 48px;
+    color: var(--cream);
+  }
+
+  .gallery-section-inner { max-width: 1200px; margin: 0 auto; }
+
+  .gallery-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    margin-bottom: 8px;
+  }
+
+  .gallery-section p {
+    font-size: 11px;
+    color: var(--sand);
+    letter-spacing: 0.06em;
+    margin-bottom: 48px;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .gallery-item {
+    cursor: pointer;
+    group: true;
+  }
+
+  .gallery-item-img {
+    aspect-ratio: 3/4;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .gallery-item-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    transition: transform 0.4s ease;
+  }
+
+  .gallery-item:hover .gallery-item-bg { transform: scale(1.04); }
+
+  .gallery-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+
+  .gallery-item-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--sand);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 14px 24px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    z-index: 999;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* COMMUNITY FEED */
+  .feed-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  .feed-header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .feed-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    margin-bottom: 6px;
+  }
+
+  .feed-header p {
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+  }
+
+  .feed-filters {
+    display: flex;
+    gap: 8px;
+  }
+
+  .feed-filter-btn {
+    padding: 7px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .feed-filter-btn.active {
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
+
+  .feed-filter-btn:hover:not(.active) {
+    border-color: var(--moss);
+    color: var(--moss);
+  }
+
+  .feed-grid {
+    columns: 4;
+    column-gap: 16px;
+  }
+
+  .feed-card {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .feed-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  }
+
+  .feed-card-img {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    position: relative;
+  }
+
+  .feed-card-img-tall { aspect-ratio: 3/4; }
+  .feed-card-img-wide { aspect-ratio: 4/3; }
+
+  .feed-card-style-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(247,245,240,0.9);
+    background: rgba(26,26,24,0.35);
+    padding: 3px 8px;
+    backdrop-filter: blur(4px);
+  }
+
+  .feed-card-body {
+    padding: 16px;
+  }
+
+  .feed-card-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .feed-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .feed-user-info { flex: 1; min-width: 0; }
+
+  .feed-username {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feed-country {
+    font-size: 9px;
+    color: var(--sage);
+    letter-spacing: 0.06em;
+  }
+
+  .feed-caption {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .feed-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .feed-tag {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--moss);
+  }
+
+  .feed-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .feed-action-group {
+    display: flex;
+    gap: 14px;
+  }
+
+  .feed-action {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    padding: 0;
+  }
+
+  .feed-action:hover { color: var(--moss); }
+  .feed-action.liked { color: #c0392b; }
+
+  .feed-time {
+    font-size: 9px;
+    color: #ccc;
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 768px) {
+    .nav { padding: 20px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 48px 24px 40px; gap: 40px; }
+    .hero-text h1 { font-size: 42px; }
+    .builder { padding: 0 24px 60px; }
+    .builder-layout { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .gallery-section { padding: 60px 24px; }
+    .divider { padding: 0 24px; }
+    .feed-section { padding: 0 24px 60px; }
+    .feed-grid { columns: 2; }
+    .feed-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+`;
+
+const GALLERY_ITEMS = [
+  { name: "Mist & Fern", style: "Tropical", price: "RM 280", emoji: "🌿", bg: "linear-gradient(135deg, #c8ddb8 0%, #8aaa70 100%)" },
+  { name: "Desert Calm", style: "Arid", price: "RM 195", emoji: "🌵", bg: "linear-gradient(135deg, #e8d8b8 0%, #c8a870 100%)" },
+  { name: "Moss Kingdom", style: "Temperate", price: "RM 340", emoji: "🍀", bg: "linear-gradient(135deg, #b8d0a8 0%, #7a9a60 100%)" },
+  { name: "Night Garden", style: "Dark", price: "RM 420", emoji: "🌙", bg: "linear-gradient(135deg, #2a3a2a 0%, #4a5a3a 100%)" },
+];
+
+export default function TerraSquad() {
+  const [ecosystem, setEcosystem] = useState("");
+  const [size, setSize] = useState("");
+  const [mood, setMood] = useState("");
+  const [extras, setExtras] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [toast, setToast] = useState("");
+  const [feedFilter, setFeedFilter] = useState("All");
+  const [likedPosts, setLikedPosts] = useState({});
+
+  const toggleLike = (i) => {
+    setLikedPosts(prev => ({ ...prev, [i]: !prev[i] }));
+  };
+
+  const feedFilters = ["All", "🇲🇾 Malaysia", "🇯🇵 Japan", "🇰🇷 Korea", "🇮🇩 Indonesia", "🇸🇬 Singapore", "🇹🇭 Thailand"];
+
+  const filteredFeed = feedFilter === "All"
+    ? ASIA_FEED
+    : ASIA_FEED.filter(p => p.country.includes(feedFilter.slice(2)));
+
+  const ecosystems = ["Tropical", "Desert", "Temperate", "Moss", "Aquatic", "Dark"];
+  const sizes = ["Palm-sized", "Tabletop", "Statement", "Floor"];
+  const moods = ["Serene", "Wild", "Mystical", "Minimal", "Lush"];
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2800);
+  };
+
+  const generateDesign = async () => {
+    if (!ecosystem || !size || !mood) return;
+    setLoading(true);
+    setResult(null);
+
+    const prompt = `You are TerraSquad's AI terrarium designer. Generate a custom terrarium design based on these inputs:
+- Ecosystem: ${ecosystem}
+- Size: ${size}
+- Mood: ${mood}
+- Extra notes: ${extras || "none"}
+
+Respond ONLY with a valid JSON object. No markdown, no explanation, just JSON:
+{
+  "name": "poetic terrarium name (2-3 words, evocative)",
+  "description": "2 sentence description of the design, sensory and vivid",
+  "plants": [
+    {"name": "Plant name", "role": "its role e.g. Canopy / Ground cover / Accent"},
+    {"name": "Plant name", "role": "role"},
+    {"name": "Plant name", "role": "role"}
+  ],
+  "substrate": "substrate description",
+  "price": "estimated price in RM (number only, e.g. 320)",
+  "emoji": "single most fitting emoji for this design",
+  "gradient": "a CSS gradient string using earthy greens, browns, and nature tones"
+}`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      const data = await response.json();
+      const text = data.content?.find(b => b.type === "text")?.text || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      setResult(parsed);
+    } catch (e) {
+      showToast("Something went wrong. Try again.");
+    }
+
+    setLoading(false);
+  };
+
+  const canGenerate = ecosystem && size && mood;
+
+  return (
+    <div className="app">
+      <style>{styles}</style>
+
+      {/* NAV */}
+      <nav className="nav">
+        <div className="nav-logo">Terra<span>Squad</span></div>
+        <div className="nav-links">
+          <a>Gallery</a>
+          <a>Build</a>
+          <a>Community</a>
+          <a>Shop</a>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-text">
+          <h1>Living art,<br /><em>designed</em><br />by you.</h1>
+          <p>TerraSquad is where terrarium culture meets creative community. Browse, build, and bring home miniature worlds crafted by AI and loved by collectors.</p>
+          <button className="btn-primary" onClick={() => document.getElementById("builder").scrollIntoView({ behavior: "smooth" })}>
+            Build yours
+          </button>
+          <button className="btn-secondary" onClick={() => document.getElementById("gallery").scrollIntoView({ behavior: "smooth" })}>
+            Browse gallery
+          </button>
+        </div>
+        <div className="gallery-preview">
+          {["🌿", "🌵", "🍀"].map((emoji, i) => (
+            <div className="gallery-card" key={i}>
+              <div className="terrarium-visual">{emoji}</div>
+              <div className="gallery-card-label">{["Tropical", "Desert", "Temperate"][i]}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* DIVIDER */}
+      <div className="divider">
+        <div className="divider-line" />
+        <div className="divider-text">AI Builder</div>
+        <div className="divider-line" />
+      </div>
+
+      {/* BUILDER */}
+      <section className="builder" id="builder">
+        <div className="builder-header">
+          <h2>Design your terrarium</h2>
+          <p>Tell the AI what you want — it handles the rest.</p>
+        </div>
+
+        <div className="builder-layout">
+          {/* FORM */}
+          <div className="form-section">
+            <div className="form-group">
+              <div className="form-label">Ecosystem</div>
+              <div className="chip-group">
+                {ecosystems.map(e => (
+                  <button key={e} className={`chip ${ecosystem === e ? "active" : ""}`} onClick={() => setEcosystem(e)}>{e}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="form-label">Size</div>
+              <div className="chip-group">
+                {sizes.map(s => (
+                  <button key={s} className={`chip ${size === s ? "active" : ""}`} onClick={() => setSize(s)}>{s}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="form-label">Mood</div>
+              <div className="chip-group">
+                {moods.map(m => (
+                  <button key={m} className={`chip ${mood === m ? "active" : ""}`} onClick={() => setMood(m)}>{m}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="form-label">Anything else? (optional)</div>
+              <textarea
+                className="form-textarea"
+                placeholder="e.g. I want it to feel like a forest after rain..."
+                value={extras}
+                onChange={e => setExtras(e.target.value)}
+              />
+            </div>
+
+            <button className="generate-btn" onClick={generateDesign} disabled={!canGenerate || loading}>
+              {loading ? "Designing..." : "Generate design →"}
+            </button>
+          </div>
+
+          {/* RESULT */}
+          <div className="result-panel">
+            <div className="result-panel-header">
+              <div className="result-panel-title">Your Design</div>
+              {result && <div style={{ fontSize: "10px", color: "#aaa", letterSpacing: "0.08em" }}>AI Generated</div>}
+            </div>
+
+            <div className="result-panel-body">
+              {!loading && !result && (
+                <div className="empty-state">
+                  <div className="empty-icon">🪴</div>
+                  <p>Select your preferences and generate your custom terrarium design.</p>
+                </div>
+              )}
+
+              {loading && (
+                <div className="loading-state">
+                  <div className="loading-dots">
+                    <div className="dot" />
+                    <div className="dot" />
+                    <div className="dot" />
+                  </div>
+                  <div className="loading-text">Cultivating your design</div>
+                </div>
+              )}
+
+              {result && !loading && (
+                <>
+                  <div className="design-name">{result.name}</div>
+
+                  <div className="design-visual" style={{ background: result.gradient || "linear-gradient(135deg, #dce8d0 0%, #8fa880 100%)" }}>
+                    <div className="design-visual-inner">{result.emoji}</div>
+                  </div>
+
+                  <div className="design-description">{result.description}</div>
+
+                  <div className="form-label">Plant Selection</div>
+                  <div className="plant-list">
+                    {result.plants?.map((p, i) => (
+                      <div className="plant-item" key={i}>
+                        <span className="plant-name">{p.name}</span>
+                        <span className="plant-role">{p.role}</span>
+                      </div>
+                    ))}
+                    {result.substrate && (
+                      <div className="plant-item">
+                        <span className="plant-name">{result.substrate}</span>
+                        <span className="plant-role">Substrate</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="price-row">
+                    <div>
+                      <div className="price-label">Estimated Total</div>
+                      <div className="price-amount">RM {result.price}</div>
+                    </div>
+                  </div>
+
+                  <div className="action-row">
+                    <button className="btn-cart" onClick={() => showToast("Added to cart ✓")}>Add to cart</button>
+                    <button className="btn-save" onClick={() => showToast("Saved to your gallery ✓")}>Save</button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section className="gallery-section" id="gallery">
+        <div className="gallery-section-inner">
+          <h2>Community Gallery</h2>
+          <p>Designs loved by the TerraSquad community — browse, save, or purchase.</p>
+
+          <div className="gallery-grid">
+            {GALLERY_ITEMS.map((item, i) => (
+              <div className="gallery-item" key={i} onClick={() => showToast(`Viewing ${item.name}`)}>
+                <div className="gallery-item-img">
+                  <div className="gallery-item-bg" style={{ background: item.bg }}>
+                    {item.emoji}
+                  </div>
+                </div>
+                <div className="gallery-item-name">{item.name}</div>
+                <div className="gallery-item-meta">
+                  <span>{item.style}</span>
+                  <span>{item.price}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COMMUNITY FEED DIVIDER */}
+      <div className="divider" style={{ marginTop: "0", marginBottom: "60px" }}>
+        <div className="divider-line" />
+        <div className="divider-text">Asia Community</div>
+        <div className="divider-line" />
+      </div>
+
+      {/* COMMUNITY FEED */}
+      <section className="feed-section" id="community">
+        <div className="feed-header">
+          <div>
+            <h2>From across Asia</h2>
+            <p>Real builds. Real growers. One living community.</p>
+          </div>
+          <div className="feed-filters">
+            {feedFilters.map(f => (
+              <button
+                key={f}
+                className={`feed-filter-btn ${feedFilter === f ? "active" : ""}`}
+                onClick={() => setFeedFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="feed-grid">
+          {filteredFeed.map((post, i) => (
+            <div className="feed-card" key={i}>
+              <div
+                className={`feed-card-img ${i % 3 === 1 ? "feed-card-img-wide" : "feed-card-img-tall"}`}
+                style={{ background: post.bg }}
+              >
+                <span style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.2))" }}>{post.emoji}</span>
+                <div className="feed-card-style-tag">{post.style}</div>
+              </div>
+
+              <div className="feed-card-body">
+                <div className="feed-card-user">
+                  <div className="feed-avatar">{post.emoji}</div>
+                  <div className="feed-user-info">
+                    <div className="feed-username">{post.user}</div>
+                    <div className="feed-country">{post.country}</div>
+                  </div>
+                </div>
+
+                <div className="feed-caption">{post.caption}</div>
+
+                <div className="feed-tags">
+                  {post.tags.map((tag, j) => (
+                    <span className="feed-tag" key={j}>{tag}</span>
+                  ))}
+                </div>
+
+                <div className="feed-actions">
+                  <div className="feed-action-group">
+                    <button
+                      className={`feed-action ${likedPosts[i] ? "liked" : ""}`}
+                      onClick={() => toggleLike(i)}
+                    >
+                      {likedPosts[i] ? "♥" : "♡"} {likedPosts[i] ? post.likes + 1 : post.likes}
+                    </button>
+                    <button className="feed-action" onClick={() => showToast("Comments coming soon")}>
+                      ◯ {post.comments}
+                    </button>
+                  </div>
+                  <span className="feed-time">{post.time}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
